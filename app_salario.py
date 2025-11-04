@@ -179,7 +179,7 @@ def crear_formulario_horarios(lunes, domingo):
                 
             else:
                 # DÍA CON TRABAJO - Expander siempre expandido y funcional
-                with st.expander(f"✅ {dia} - {fecha_dia.strftime('%d/%m/%Y')} - Día laboral", expanded=False):
+                with st.expander(f"✅ {dia} - {fecha_dia.strftime('%d/%m/%Y')} - Día laboral", expanded=True):
                     # Selectores de hora
                     st.markdown("**Horario:**")
                     col_entrada, col_salida = st.columns(2)
@@ -453,12 +453,13 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
                 pdf.cell(0, 8, f"   + Recargo aplicado: ${registro['recargo']:,.0f}", new_x="LMARGIN", new_y="NEXT")
             pdf.ln(2)
         
-        return pdf.output().encode('latin1')
+        # CORRECCIÓN: pdf.output() ya retorna bytes, no necesita encode
+        return pdf.output()
         
     except Exception as e:
         st.error(f"Error generando PDF: {e}")
         return None
-    
+
 def obtener_nombre_pdf(lunes_semana, domingo_semana):
     """Genera el nombre del PDF con el formato solicitado"""
     return f"Salary_sem_{lunes_semana.strftime('%d_%m_%y')}_to_{domingo_semana.strftime('%d_%m_%y')}.pdf"
@@ -746,25 +747,33 @@ def main():
             st.markdown("### 📄 Generar Reporte en PDF")
             
             # Crear enlace de descarga con nombre personalizado
-            b64_pdf = base64.b64encode(st.session_state.pdf_bytes).decode()
-            nombre_pdf = obtener_nombre_pdf(lunes, domingo)
-            
-            st.markdown(
-                f'<a href="data:application/pdf;base64,{b64_pdf}" download="{nombre_pdf}" style="background-color: #4CAF50; color: white; padding: 14px 20px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px; font-weight: bold; margin: 10px 0;">📥 DESCARGAR {nombre_pdf}</a>',
-                unsafe_allow_html=True
-            )
-            
-            st.info("""
-            ✅ **El PDF incluye:**
-            - Reglas y tarifas aplicadas
-            - Horarios completos en formato AM/PM
-            - Fechas exactas para cada día
-            - Horas trabajadas en formato hh:mm
-            - Cálculo detallado por día
-            - Resumen semanal completo
-            - **Total de horas trabajadas en formato hh:mm**
-            - Formato profesional para impresión
-            """)
+            try:
+                # Asegurarnos de que son bytes
+                if isinstance(st.session_state.pdf_bytes, str):
+                    b64_pdf = base64.b64encode(st.session_state.pdf_bytes.encode('latin1')).decode()
+                else:
+                    b64_pdf = base64.b64encode(st.session_state.pdf_bytes).decode()
+                    
+                nombre_pdf = obtener_nombre_pdf(lunes, domingo)
+                
+                st.markdown(
+                    f'<a href="data:application/pdf;base64,{b64_pdf}" download="{nombre_pdf}" style="background-color: #4CAF50; color: white; padding: 14px 20px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px; font-weight: bold; margin: 10px 0;">📥 DESCARGAR {nombre_pdf}</a>',
+                    unsafe_allow_html=True
+                )
+                
+                st.info("""
+                ✅ **El PDF incluye:**
+                - Reglas y tarifas aplicadas
+                - Horarios completos en formato AM/PM
+                - Fechas exactas para cada día
+                - Horas trabajadas en formato hh:mm
+                - Cálculo detallado por día
+                - Resumen semanal completo
+                - **Total de horas trabajadas en formato hh:mm**
+                - Formato profesional para impresión
+                """)
+            except Exception as e:
+                st.error(f"Error preparando PDF para descarga: {e}")
 
 if __name__ == "__main__":
     main()
