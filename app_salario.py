@@ -320,36 +320,36 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
         
         # Título con rango de fechas
         pdf.set_font('Arial', 'B', 16)
-        pdf.cell(0, 10, 'REPORTE DE SALARIO SEMANAL', 0, 1, 'C')
+        pdf.cell(0, 10, 'REPORTE DE SALARIO SEMANAL', new_x="LMARGIN", new_y="NEXT", align='C')
         pdf.ln(2)
         
         # Rango de fechas de la semana
         pdf.set_font('Arial', 'B', 12)
-        pdf.cell(0, 10, f'Semana: {lunes_semana.strftime("%d/%m/%Y")} - {domingo_semana.strftime("%d/%m/%Y")}', 0, 1, 'C')
+        pdf.cell(0, 10, f'Semana: {lunes_semana.strftime("%d/%m/%Y")} - {domingo_semana.strftime("%d/%m/%Y")}', new_x="LMARGIN", new_y="NEXT", align='C')
         pdf.ln(2)
         
         # Fecha y hora de generación
         pdf.set_font('Arial', 'I', 10)
-        pdf.cell(0, 10, f'Generado el: {fecha_generacion.strftime("%d/%m/%Y a las %H:%M")}', 0, 1, 'C')
+        pdf.cell(0, 10, f'Generado el: {fecha_generacion.strftime("%d/%m/%Y a las %H:%M")}', new_x="LMARGIN", new_y="NEXT", align='C')
         pdf.ln(10)
         
         # SECCIÓN MEJORADA: REGLAS Y TARIFAS EN PDF
         pdf.set_font('Arial', 'B', 14)
-        pdf.cell(0, 10, 'REGLAS Y TARIFAS APLICADAS:', 0, 1)
+        pdf.cell(0, 10, 'REGLAS Y TARIFAS APLICADAS:', new_x="LMARGIN", new_y="NEXT")
         pdf.ln(5)
         
         # Tarifas
         pdf.set_font('Arial', 'B', 12)
-        pdf.cell(0, 8, 'TARIFAS:', 0, 1)
+        pdf.cell(0, 8, 'TARIFAS:', new_x="LMARGIN", new_y="NEXT")
         pdf.set_font('Arial', '', 10)
-        pdf.cell(0, 6, f"- Hora normal: ${REGLAS_TARIFAS['hora_normal']:,.0f}", 0, 1)
-        pdf.cell(0, 6, f"- 6 horas completas: ${REGLAS_TARIFAS['tarifa_6_horas']:,.0f}", 0, 1)
-        pdf.cell(0, 6, f"- Horas extra: ${REGLAS_TARIFAS['hora_normal']:,.0f} c/u", 0, 1)
+        pdf.cell(0, 6, f"- Hora normal: ${REGLAS_TARIFAS['hora_normal']:,.0f}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 6, f"- 6 horas completas: ${REGLAS_TARIFAS['tarifa_6_horas']:,.0f}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 6, f"- Horas extra: ${REGLAS_TARIFAS['hora_normal']:,.0f} c/u", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(5)
         
         # Reglas
         pdf.set_font('Arial', 'B', 12)
-        pdf.cell(0, 8, 'REGLAS DE CALCULO:', 0, 1)
+        pdf.cell(0, 8, 'REGLAS DE CALCULO:', new_x="LMARGIN", new_y="NEXT")
         pdf.set_font('Arial', '', 10)
         reglas = [
             REGLAS_TARIFAS['descripciones']['menos_6_horas'],
@@ -359,33 +359,33 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
         ]
         
         for regla in reglas:
-            pdf.cell(0, 6, regla, 0, 1)
+            pdf.cell(0, 6, regla, new_x="LMARGIN", new_y="NEXT")
         
         # Recargos
         pdf.ln(5)
         pdf.set_font('Arial', 'B', 12)
-        pdf.cell(0, 8, 'RECARGOS DISPONIBLES:', 0, 1)
+        pdf.cell(0, 8, 'RECARGOS DISPONIBLES:', new_x="LMARGIN", new_y="NEXT")
         pdf.set_font('Arial', '', 10)
         recargos_texto = ", ".join(REGLAS_TARIFAS['recargos_disponibles'].keys())
-        pdf.cell(0, 6, recargos_texto, 0, 1)
+        pdf.cell(0, 6, recargos_texto, new_x="LMARGIN", new_y="NEXT")
         
         pdf.ln(10)
         
         # Tabla de datos
         pdf.set_font('Arial', 'B', 14)
-        pdf.cell(0, 10, 'DETALLE POR DIA:', 0, 1)
+        pdf.cell(0, 10, 'DETALLE POR DIA:', new_x="LMARGIN", new_y="NEXT")
         pdf.ln(5)
         
         # Encabezados de tabla
         pdf.set_font('Arial', 'B', 9)
-        pdf.cell(25, 10, 'DIA', 1, 0, 'C')
-        pdf.cell(25, 10, 'FECHA', 1, 0, 'C')
-        pdf.cell(20, 10, 'ENTRADA', 1, 0, 'C')
-        pdf.cell(20, 10, 'SALIDA', 1, 0, 'C')
-        pdf.cell(20, 10, 'HORAS', 1, 0, 'C')
-        pdf.cell(30, 10, 'PAGO BASE', 1, 0, 'C')
-        pdf.cell(25, 10, 'RECARGO', 1, 0, 'C')
-        pdf.cell(35, 10, 'TOTAL DIA', 1, 1, 'C')
+        pdf.cell(25, 10, 'DIA', border=1, align='C')
+        pdf.cell(25, 10, 'FECHA', border=1, align='C')
+        pdf.cell(20, 10, 'ENTRADA', border=1, align='C')
+        pdf.cell(20, 10, 'SALIDA', border=1, align='C')
+        pdf.cell(20, 10, 'HORAS', border=1, align='C')
+        pdf.cell(30, 10, 'PAGO BASE', border=1, align='C')
+        pdf.cell(25, 10, 'RECARGO', border=1, align='C')
+        pdf.cell(35, 10, 'TOTAL DIA', border=1, new_x="LMARGIN", new_y="NEXT", align='C')
         
         # Datos de la tabla
         pdf.set_font('Arial', '', 9)
@@ -407,14 +407,14 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
                 entrada_str = "---"
                 salida_str = "---"
             
-            pdf.cell(25, 10, registro['dia'][:7], 1, 0, 'C')
-            pdf.cell(25, 10, fecha_dia_str, 1, 0, 'C')
-            pdf.cell(20, 10, entrada_str, 1, 0, 'C')
-            pdf.cell(20, 10, salida_str, 1, 0, 'C')
-            pdf.cell(20, 10, registro['horas_formato'], 1, 0, 'C')  # Usar formato hh:mm
-            pdf.cell(30, 10, f"${registro['pago_base']:,.0f}", 1, 0, 'C')
-            pdf.cell(25, 10, f"${registro['recargo']:,.0f}", 1, 0, 'C')
-            pdf.cell(35, 10, f"${registro['pago_total']:,.0f}", 1, 1, 'C')
+            pdf.cell(25, 10, registro['dia'][:7], border=1, align='C')
+            pdf.cell(25, 10, fecha_dia_str, border=1, align='C')
+            pdf.cell(20, 10, entrada_str, border=1, align='C')
+            pdf.cell(20, 10, salida_str, border=1, align='C')
+            pdf.cell(20, 10, registro['horas_formato'], border=1, align='C')  # Usar formato hh:mm
+            pdf.cell(30, 10, f"${registro['pago_base']:,.0f}", border=1, align='C')
+            pdf.cell(25, 10, f"${registro['recargo']:,.0f}", border=1, align='C')
+            pdf.cell(35, 10, f"${registro['pago_total']:,.0f}", border=1, new_x="LMARGIN", new_y="NEXT", align='C')
         
         pdf.ln(10)
         
@@ -424,14 +424,14 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
         
         # Totales
         pdf.set_font('Arial', 'B', 16)
-        pdf.cell(0, 10, f'TOTAL SEMANAL: ${total_semanal:,.0f} COP', 0, 1, 'C')
+        pdf.cell(0, 10, f'TOTAL SEMANAL: ${total_semanal:,.0f} COP', new_x="LMARGIN", new_y="NEXT", align='C')
         pdf.set_font('Arial', 'B', 14)
-        pdf.cell(0, 10, f'TOTAL HORAS TRABAJADAS: {total_horas_formato}', 0, 1, 'C')
+        pdf.cell(0, 10, f'TOTAL HORAS TRABAJADAS: {total_horas_formato}', new_x="LMARGIN", new_y="NEXT", align='C')
         
         # Análisis detallado
         pdf.ln(10)
         pdf.set_font('Arial', 'B', 12)
-        pdf.cell(0, 10, 'ANALISIS DETALLADO:', 0, 1)
+        pdf.cell(0, 10, 'ANALISIS DETALLADO:', new_x="LMARGIN", new_y="NEXT")
         pdf.set_font('Arial', '', 10)
         
         for i, registro in enumerate(registros_semana, 1):
@@ -448,17 +448,17 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
             else:
                 horario_info = ""
             
-            pdf.cell(0, 8, f"{i}. {registro['dia']} ({fecha_dia_str}): {registro['descripcion']}{horario_info}", 0, 1)
+            pdf.cell(0, 8, f"{i}. {registro['dia']} ({fecha_dia_str}): {registro['descripcion']}{horario_info}", new_x="LMARGIN", new_y="NEXT")
             if registro['recargo'] > 0:
-                pdf.cell(0, 8, f"   + Recargo aplicado: ${registro['recargo']:,.0f}", 0, 1)
+                pdf.cell(0, 8, f"   + Recargo aplicado: ${registro['recargo']:,.0f}", new_x="LMARGIN", new_y="NEXT")
             pdf.ln(2)
         
-        return pdf.output(dest='S').encode('latin1')
+        return pdf.output().encode('latin1')
         
     except Exception as e:
         st.error(f"Error generando PDF: {e}")
         return None
-
+    
 def obtener_nombre_pdf(lunes_semana, domingo_semana):
     """Genera el nombre del PDF con el formato solicitado"""
     return f"Salary_sem_{lunes_semana.strftime('%d_%m_%y')}_to_{domingo_semana.strftime('%d_%m_%y')}.pdf"
