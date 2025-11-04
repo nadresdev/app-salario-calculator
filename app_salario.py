@@ -132,6 +132,14 @@ def formato_horas_minutos(minutos_totales):
     minutos = int(minutos_totales % 60)
     return f"{horas:02d}:{minutos:02d}"
 
+def formato_horas_minutos_texto(minutos_totales):
+    """Convierte minutos totales a formato 'hh horas y mm minutos'"""
+    if minutos_totales == 0:
+        return "0 horas y 0 minutos"
+    horas = int(minutos_totales // 60)
+    minutos = int(minutos_totales % 60)
+    return f"{horas} hora{'s' if horas != 1 else ''} y {minutos} minuto{'s' if minutos != 1 else ''}"
+
 def crear_formulario_horarios(lunes, domingo):
     """Crea los controles de horarios sin formulario para permitir reruns automáticos"""
     
@@ -251,9 +259,10 @@ def crear_formulario_horarios(lunes, domingo):
                 'dia': dia,
                 'minutos_trabajados': minutos_trabajados,
                 'horas_formato': formato_horas_minutos(minutos_trabajados),
+                'horas_texto': formato_horas_minutos_texto(minutos_trabajados),  # Nuevo formato de texto
                 'horas_decimal': horas_trabajadas,
-                'pago_base': pago_base,
-                'pago_total': pago_total,
+                'pago_base': int(round(pago_base, 0)),  # Redondear a entero
+                'pago_total': int(round(pago_total, 0)),  # Redondear a entero
                 'recargo': recargo,
                 'descripcion': descripcion,
                 'sin_trabajo': sin_trabajo
@@ -299,13 +308,13 @@ def calcular_pago_dia(horas_trabajadas, recargo):
         return 0, "Día sin trabajo", 0
     elif horas_trabajadas < 6:
         pago_base = horas_trabajadas * HORA_NORMAL
-        return pago_base + recargo, f"Horas normales ({horas_trabajadas:.2f}h)", pago_base
+        return int(round(pago_base + recargo, 0)), f"Horas normales ({horas_trabajadas:.2f}h)", int(round(pago_base, 0))
     elif horas_trabajadas == 6:
-        return TARIFA_6_HORAS + recargo, "6 horas completas", TARIFA_6_HORAS
+        return int(round(TARIFA_6_HORAS + recargo, 0)), "6 horas completas", TARIFA_6_HORAS
     else:
         horas_extra = horas_trabajadas - 6
         pago_base = TARIFA_6_HORAS + (horas_extra * HORA_NORMAL)
-        return pago_base + recargo, f"6h + {horas_extra:.2f}h extra", pago_base
+        return int(round(pago_base + recargo, 0)), f"6h + {horas_extra:.2f}h extra", int(round(pago_base, 0))
 
 def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_semana, domingo_semana):
     """Genera un PDF con el reporte detallado incluyendo reglas y tarifas"""
@@ -421,12 +430,13 @@ def generar_pdf(registros_semana, total_semanal, horarios_completos, lunes_seman
         # CALCULAR TOTAL DE HORAS TRABAJADAS EN MINUTOS
         total_minutos_trabajados = sum(registro['minutos_trabajados'] for registro in registros_semana)
         total_horas_formato = formato_horas_minutos(total_minutos_trabajados)
+        total_horas_texto = formato_horas_minutos_texto(total_minutos_trabajados)  # Nuevo formato
         
         # Totales
         pdf.set_font('Arial', 'B', 16)
         pdf.cell(0, 10, f'TOTAL SEMANAL: ${total_semanal:,.0f} COP', new_x="LMARGIN", new_y="NEXT", align='C')
         pdf.set_font('Arial', 'B', 14)
-        pdf.cell(0, 10, f'TOTAL HORAS TRABAJADAS: {total_horas_formato}', new_x="LMARGIN", new_y="NEXT", align='C')
+        pdf.cell(0, 10, f'TOTAL HORAS TRABAJADAS: {total_horas_texto}', new_x="LMARGIN", new_y="NEXT", align='C')
         
         # Análisis detallado
         pdf.ln(10)
@@ -512,7 +522,7 @@ def guardar_en_google_sheets(spreadsheet, registros_semana, total_semanal, horar
         
         # CALCULAR TOTAL DE HORAS TRABAJADAS
         total_minutos_trabajados = sum(registro['minutos_trabajados'] for registro in registros_semana)
-        total_horas_formato = formato_horas_minutos(total_minutos_trabajados)
+        total_horas_texto = formato_horas_minutos_texto(total_minutos_trabajados)  # Nuevo formato
         
         # Preparar datos para Google Sheets
         headers = [
@@ -541,7 +551,7 @@ def guardar_en_google_sheets(spreadsheet, registros_semana, total_semanal, horar
                 fecha_dia_str,
                 entrada_str,
                 salida_str,
-                registro['horas_formato'],  # Usar formato hh:mm en lugar de decimal
+                registro['horas_texto'],  # Usar nuevo formato de texto
                 registro['pago_base'],
                 registro['recargo'],
                 registro['pago_total'],
@@ -553,7 +563,7 @@ def guardar_en_google_sheets(spreadsheet, registros_semana, total_semanal, horar
         # Agregar filas de información
         data.append([])  # Fila vacía
         data.append(["TOTAL SEMANAL", "", "", "", "", "", "", total_semanal, "", ""])
-        data.append(["TOTAL HORAS TRABAJADAS", "", "", "", total_horas_formato, "", "", "", "", ""])
+        data.append(["TOTAL HORAS TRABAJADAS", "", "", "", total_horas_texto, "", "", "", "", ""])  # Nuevo formato
         data.append([])
         data.append(["Fecha de registro", fecha_guardado.strftime("%d/%m/%Y %H:%M:%S")])
         data.append(["Rango de semana", f"{lunes_semana.strftime('%d/%m/%Y')} - {domingo_semana.strftime('%d/%m/%Y')}"])
@@ -650,7 +660,7 @@ def main():
             if st.button("📊 Calcular Salario Semanal", type="primary", use_container_width=True):
                 if registros_semana:
                     st.session_state.registros_semana = registros_semana
-                    st.session_state.total_semanal = sum(registro['pago_total'] for registro in registros_semana)
+                    st.session_state.total_semanal = int(round(sum(registro['pago_total'] for registro in registros_semana), 0))  # Redondear a entero
                     st.session_state.horarios_completos = horarios_completos
                     st.session_state.google_sheets_guardado = False
                     
@@ -698,7 +708,7 @@ def main():
         
         # CALCULAR TOTAL DE HORAS TRABAJADAS
         total_minutos_trabajados = sum(registro['minutos_trabajados'] for registro in st.session_state.registros_semana)
-        total_horas_formato = formato_horas_minutos(total_minutos_trabajados)
+        total_horas_texto = formato_horas_minutos_texto(total_minutos_trabajados)  # Nuevo formato
         
         # Mostrar tabla de resultados con fechas
         for i, registro in enumerate(st.session_state.registros_semana):
@@ -723,10 +733,10 @@ def main():
             
             with col3:
                 if not registro['sin_trabajo']:
-                    st.write(f"⏱️ {registro['horas_formato']}")  # Mostrar formato hh:mm
+                    st.write(f"⏱️ {registro['horas_texto']}")  # Mostrar nuevo formato de texto
             
             with col4:
-                st.write(f"💰 ${registro['pago_total']:,.0f}")
+                st.write(f"💰 ${registro['pago_total']:,.0f}")  # Ya está redondeado
             
             with col5:
                 st.write(registro['descripcion'])
@@ -738,9 +748,9 @@ def main():
         # Mostrar total semanal CON TOTAL DE HORAS
         col_total1, col_total2 = st.columns(2)
         with col_total1:
-            st.success(f"## 🎉 TOTAL SEMANAL: ${total_semanal:,.0f}")
+            st.success(f"## 🎉 TOTAL SEMANAL: ${total_semanal:,.0f}")  # Ya está redondeado
         with col_total2:
-            st.success(f"## ⏱️ TOTAL HORAS: {total_horas_formato}")
+            st.success(f"## ⏱️ TOTAL HORAS: {total_horas_texto}")  # Nuevo formato
         
         # Sección para generar PDF
         if PDF_AVAILABLE and st.session_state.pdf_bytes is not None:
