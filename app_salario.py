@@ -551,7 +551,7 @@ def guardar_en_google_sheets(spreadsheet, registros_semana, total_semanal, horar
                 fecha_dia_str,
                 entrada_str,
                 salida_str,
-                registro['horas_texto'],  # Usar nuevo formato de texto
+                registro['horas_formato'],  # Usar nuevo formato de texto
                 registro['pago_base'],
                 registro['recargo'],
                 registro['pago_total'],
@@ -733,7 +733,7 @@ def main():
             
             with col3:
                 if not registro['sin_trabajo']:
-                    st.write(f"⏱️ {registro['horas_texto']}")  # Mostrar nuevo formato de texto
+                    st.write(f"⏱️ {registro['horas_formato']}")  # Mostrar nuevo formato de texto
             
             with col4:
                 st.write(f"💰 ${registro['pago_total']:,.0f}")  # Ya está redondeado
